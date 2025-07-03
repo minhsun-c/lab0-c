@@ -4,6 +4,8 @@
 
 #include "queue.h"
 
+static element_t *alloc_new_node(struct list_head *head, char *s);
+
 /* Create an empty queue */
 struct list_head *q_new()
 {
@@ -30,12 +32,24 @@ void q_free(struct list_head *head)
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    element_t *new_node = alloc_new_node(head, s);
+    if (!new_node)
+        return false;
+
+    list_add(&new_node->list, head);
+
     return true;
 }
 
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    element_t *new_node = alloc_new_node(head, s);
+    if (!new_node)
+        return false;
+
+    list_add_tail(&new_node->list, head);
+
     return true;
 }
 
@@ -111,4 +125,20 @@ int q_merge(struct list_head *head, bool descend)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
     return 0;
+}
+
+static element_t *alloc_new_node(struct list_head *head, char *s)
+{
+    element_t *new_node = (element_t *) malloc(sizeof(element_t));
+    if (!new_node)
+        return NULL;
+    size_t s_len = strlen(s);
+    new_node->value = (char *) malloc(s_len + 1);
+    if (!new_node->value) {
+        free(new_node);
+        return NULL;
+    }
+    strncpy(new_node->value, s, s_len + 1);
+    INIT_LIST_HEAD(&new_node->list);
+    return new_node;
 }
