@@ -7,6 +7,9 @@
 static element_t *alloc_new_node(struct list_head *head, char *s);
 static void q_delete_node(struct list_head *target);
 static struct list_head *q_get_mid(struct list_head *head);
+static void q_merge_two_list(struct list_head *head1,
+                             struct list_head *head2,
+                             bool descend);
 
 /* Create an empty queue */
 struct list_head *q_new()
@@ -202,7 +205,23 @@ void q_reverseK(struct list_head *head, int k)
 }
 
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    LIST_HEAD(head2);
+
+    struct list_head *mid = q_get_mid(head);
+    if (mid == NULL)
+        return;
+
+    list_cut_position(&head2, head, mid);
+
+    q_sort(head, descend);
+    q_sort(&head2, descend);
+    q_merge_two_list(head, &head2, descend);
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
@@ -267,4 +286,31 @@ static struct list_head *q_get_mid(struct list_head *head)
     if (fast->next->next == head)
         slow = slow->next;
     return slow;
+}
+
+static void q_merge_two_list(struct list_head *head1,
+                             struct list_head *head2,
+                             bool descend)
+{
+    struct list_head merged;
+    INIT_LIST_HEAD(&merged);
+
+    const char *str1, *str2;
+
+    while (!list_empty(head1) && !list_empty(head2)) {
+        str1 = list_entry(head1->next, element_t, list)->value;
+        str2 = list_entry(head2->next, element_t, list)->value;
+        if ((descend && strcmp(str1, str2) > 0) ||
+            (!descend && strcmp(str1, str2) < 0)) {
+            list_move_tail(head1->next, &merged);
+        } else {
+            list_move_tail(head2->next, &merged);
+        }
+    }
+    if (!list_empty(head1))
+        list_splice_tail_init(head1, &merged);
+    if (!list_empty(head2))
+        list_splice_tail_init(head2, &merged);
+    INIT_LIST_HEAD(head1);
+    list_splice_tail_init(&merged, head1);
 }
