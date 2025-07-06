@@ -228,7 +228,26 @@ void q_sort(struct list_head *head, bool descend)
 int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    struct list_head *cur, *safe;
+    struct list_head *temp;
+
+    int counter = 0;
+
+    list_for_each_safe(cur, safe, head) {
+        counter++;
+        temp = safe;
+        const char *left = list_entry(cur, element_t, list)->value;
+        while (temp != head) {
+            const char *right = list_entry(temp, element_t, list)->value;
+            temp = temp->next;
+            if (strcmp(left, right) >= 0) {
+                q_delete_node(cur);
+                counter--;
+                break;
+            }
+        }
+    }
+    return counter;
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
@@ -236,7 +255,26 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    struct list_head *cur, *safe;
+    struct list_head *temp;
+
+    int counter = 0;
+
+    list_for_each_safe(cur, safe, head) {
+        counter++;
+        temp = safe;
+        const char *left = list_entry(cur, element_t, list)->value;
+        while (temp != head) {
+            const char *right = list_entry(temp, element_t, list)->value;
+            temp = temp->next;
+            if (strcmp(left, right) <= 0) {
+                q_delete_node(cur);
+                counter--;
+                break;
+            }
+        }
+    }
+    return counter;
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
@@ -295,11 +333,9 @@ static void q_merge_two_list(struct list_head *head1,
     struct list_head merged;
     INIT_LIST_HEAD(&merged);
 
-    const char *str1, *str2;
-
     while (!list_empty(head1) && !list_empty(head2)) {
-        str1 = list_entry(head1->next, element_t, list)->value;
-        str2 = list_entry(head2->next, element_t, list)->value;
+        const char *str1 = list_entry(head1->next, element_t, list)->value;
+        const char *str2 = list_entry(head2->next, element_t, list)->value;
         if ((descend && strcmp(str1, str2) > 0) ||
             (!descend && strcmp(str1, str2) < 0)) {
             list_move_tail(head1->next, &merged);
