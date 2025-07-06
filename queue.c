@@ -5,6 +5,8 @@
 #include "queue.h"
 
 static element_t *alloc_new_node(struct list_head *head, char *s);
+static void q_delete_node(struct list_head *target);
+static struct list_head *q_get_mid(struct list_head *head);
 
 /* Create an empty queue */
 struct list_head *q_new()
@@ -92,6 +94,12 @@ int q_size(struct list_head *head)
 bool q_delete_mid(struct list_head *head)
 {
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+
+    struct list_head *mid = q_get_mid(head);
+    if (!mid)
+        return false;
+
+    q_delete_node(mid);
     return true;
 }
 
@@ -107,13 +115,12 @@ void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
     struct list_head *slow = head;
-    struct list_head *fast = head;
 
     while (1) {
         if (slow->next == head || slow->next->next == head)
             return;
 
-        fast = slow->next->next;
+        struct list_head *fast = slow->next->next;
         slow = slow->next;
 
         list_del_init(slow);
@@ -184,4 +191,29 @@ static element_t *alloc_new_node(struct list_head *head, char *s)
     strncpy(new_node->value, s, s_len + 1);
     INIT_LIST_HEAD(&new_node->list);
     return new_node;
+}
+
+static void q_delete_node(struct list_head *target)
+{
+    list_del(target);
+    element_t *node = list_entry(target, element_t, list);
+    free(node->value);
+    free(node);
+}
+
+static struct list_head *q_get_mid(struct list_head *head)
+{
+    if (!head || list_empty(head))
+        return NULL;
+
+    struct list_head *slow = head;
+    struct list_head *fast = head;
+
+    while (fast->next != head && fast->next->next != head) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    if (fast->next->next == head)
+        slow = slow->next;
+    return slow;
 }
