@@ -66,6 +66,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     element_t *node = list_first_entry(head, element_t, list);
     list_del(&node->list);
     strncpy(sp, node->value, bufsize);
+    sp[bufsize - 1] = 0;
     return node;
 }
 
@@ -77,6 +78,7 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     element_t *node = list_last_entry(head, element_t, list);
     list_del(&node->list);
     strncpy(sp, node->value, bufsize);
+    sp[bufsize - 1] = 0;
     return node;
 }
 
@@ -314,6 +316,7 @@ static element_t *alloc_new_node(struct list_head *head, char *s)
         return NULL;
     }
     strncpy(new_node->value, s, s_len + 1);
+    new_node->value[s_len] = 0;
     INIT_LIST_HEAD(&new_node->list);
     return new_node;
 }
