@@ -112,13 +112,13 @@ bool q_delete_dup(struct list_head *head)
 
     struct list_head *cur, *safe;
     struct list_head *temp, *temp2;
-    char *left, *right;
+    const char *right;
 
     bool dup = false;
 
     list_for_each_safe(cur, safe, head) {
         temp = safe;
-        left = list_entry(cur, element_t, list)->value;
+        const char *left = list_entry(cur, element_t, list)->value;
         while (temp != head) {
             temp2 = temp->next;
             right = list_entry(temp, element_t, list)->value;
@@ -176,6 +176,29 @@ void q_reverse(struct list_head *head)
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    int step_counter = 0;
+    struct list_head *cur, *safe;
+    struct list_head temp_head, merged;
+    INIT_LIST_HEAD(&merged);
+    list_for_each_safe(cur, safe, head) {
+        step_counter++;
+
+        if (step_counter != k)
+            continue;
+
+        step_counter = 0;
+
+        INIT_LIST_HEAD(&temp_head);
+        list_cut_position(&temp_head, head, cur);
+
+        q_reverse(&temp_head);
+        list_splice_tail_init(&temp_head, &merged);
+    }
+
+    if (!list_empty(head))
+        list_splice_tail_init(head, &merged);
+
+    list_splice_tail_init(&merged, head);
 }
 
 /* Sort elements of queue in ascending/descending order */
