@@ -123,33 +123,23 @@ bool q_delete_dup(struct list_head *head)
     if (!head || list_empty(head))
         return false;
 
-    struct list_head *cur, *safe;
-    struct list_head *temp, *temp2;
-    const char *right;
-
+    element_t *cur, *safe;
     bool dup = false;
 
-    list_for_each_safe(cur, safe, head) {
-        temp = safe;
-        const char *left = list_entry(cur, element_t, list)->value;
-        while (temp != head) {
-            temp2 = temp->next;
-            right = list_entry(temp, element_t, list)->value;
-            if (strcmp(left, right) == 0) {
-                if (safe == temp)
-                    safe = safe->next;
-                q_delete_node(temp);
-                dup = true;
-            }
-            temp = temp2;
-        }
-        if (dup) {
-            q_delete_node(cur);
+    list_for_each_entry_safe(cur, safe, head, list) {
+        if (cur->list.next != head &&
+            strcmp(cur->value,
+                   list_entry(cur->list.next, element_t, list)->value) == 0) {
+            dup = true;
+            q_delete_node(&cur->list);
+        } else if (dup) {
             dup = false;
+            q_delete_node(&cur->list);
         }
     }
     return true;
 }
+
 
 /* Swap every two adjacent nodes */
 void q_swap(struct list_head *head)
