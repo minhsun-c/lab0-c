@@ -164,8 +164,7 @@ void q_swap(struct list_head *head)
         struct list_head *fast = slow->next->next;
         slow = slow->next;
 
-        list_del_init(slow);
-        list_add(slow, fast);
+        list_move(slow, fast);
     }
 }
 
